@@ -1,0 +1,11 @@
+extends ./base.htpp
+
+{{ define "head" }}
+<title>Example - Home</title>
+{{ end }}
+
+{{ define "body" }}
+<div>
+  <p>This is an example home page!<p>
+</div>
+{{ end }}
