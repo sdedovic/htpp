@@ -11,8 +11,14 @@ import (
 )
 
 func mainErr() error {
-	readFromStdin := flag.Bool("std-in", false, "Read JSON data from stdin")
+	readFromStdin := flag.Bool("std-in", false, "Read JSON applied to template from stdin")
+	printDependencies := flag.Bool("print-dependencies", false, "Print all dependencies of the supplied template. Does not execute the template.")
 	flag.Parse()
+
+	filename := flag.Arg(0)
+	if filename == "" {
+		return errors.New("no filename specified")
+	}
 
 	var data map[string]any
 	if *readFromStdin {
@@ -22,18 +28,20 @@ func mainErr() error {
 		}
 	}
 
-	if filename := flag.Arg(0); filename != "" {
-		template, err := htpp.Make(filename)
-		if err != nil {
-			return err
-		}
+	template, err := htpp.Make(filename)
+	if err != nil {
+		return err
+	}
 
-		err = template.Execute(os.Stdout, data)
-		if err != nil {
-			return err
+	if *printDependencies {
+		for _, dep := range template.Dependencies {
+			fmt.Println(dep)
 		}
 	} else {
-		return errors.New("no filename specified")
+		err = template.Inner.Execute(os.Stdout, data)
+		if err != nil {
+			return err
+		}
 	}
 
 	return nil

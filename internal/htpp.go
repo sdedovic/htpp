@@ -19,12 +19,12 @@ var (
 
 type Partial struct {
 	identifier string
-	extends    string
+	Extends    string
 	content    string
 }
 
 func (p Partial) String() string {
-	return fmt.Sprintf("Partial{identifier: \"%s\", extends: \"%s\", content: [%db]}", p.identifier, p.extends, len(p.content))
+	return fmt.Sprintf("Partial{identifier: \"%s\", extends: \"%s\", content: [%db]}", p.identifier, p.Extends, len(p.content))
 }
 
 func parse(identifier string, template string) (Partial, error) {
@@ -38,7 +38,7 @@ func parse(identifier string, template string) (Partial, error) {
 
 		return Partial{
 			identifier: identifier,
-			extends:    splits[1],
+			Extends:    splits[1],
 			content:    strings.Join(lines[1:], "\n"),
 		}, nil
 	} else {
@@ -55,37 +55,39 @@ func parseFromFile(file string) (Partial, error) {
 }
 
 type Template struct {
-	source   *Partial
-	template template.Template
+	Inner        template.Template
+	Dependencies []string
 }
 
-func Make(filename string) (template.Template, error) {
+func Make(filename string) (Template, error) {
 	stack := make([]*Partial, 0)
+	dependencies := make([]string, 0)
 
 	for {
 		partial, err := parseFromFile(filename)
 		if err != nil {
-			return template.Template{}, err
+			return Template{}, err
 		}
 
 		stack = append(stack, &partial)
 
-		if partial.extends == "" {
+		if partial.Extends == "" {
 			break
 		}
 
-		if relativeFileRegex.MatchString(partial.extends) {
-			filename = path.Clean(path.Join(path.Dir(filename), partial.extends))
+		if relativeFileRegex.MatchString(partial.Extends) {
+			filename = path.Clean(path.Join(path.Dir(filename), partial.Extends))
+			dependencies = append(dependencies, filename)
 			continue
 		}
 
-		return template.Template{}, CouldNotResolveTemplateExtension
+		return Template{}, CouldNotResolveTemplateExtension
 	}
 
 	n := len(stack)
 	tmpl, err := template.New("default").Parse(stack[n-1].content)
 	if err != nil {
-		return template.Template{}, err
+		return Template{}, err
 	}
 
 	stack = stack[:n-1]
@@ -93,10 +95,10 @@ func Make(filename string) (template.Template, error) {
 		n := len(stack)
 		tmpl, err = template.Must(tmpl.Clone()).Parse(stack[n-1].content)
 		if err != nil {
-			return template.Template{}, err
+			return Template{}, err
 		}
 		stack = stack[:n-1]
 	}
 
-	return *tmpl, nil
+	return Template{*tmpl, dependencies}, nil
 }

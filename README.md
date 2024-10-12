@@ -20,9 +20,11 @@ htpp
 
 Usage:
   htpp [--std-in] <filename>
+  htpp [--print-dependencies] <filename>
 
 Options:
-  --std-in  Read JSON applied to template from stdin
+  --std-in              Read JSON applied to template from stdin
+  --print-dependencies  Print all dependencies of the supplied template. Does not execute the template.
 ````
 
 ## Future Thoughts / ToDo
