@@ -21,7 +21,7 @@
         formatter = pkgs.alejandra;
         packages.htpp = pkgs.buildGoModule {
           pname = "htpp";
-          version = "0.0.1";
+          version = "0.1.0";
 
           src = ./.;
 

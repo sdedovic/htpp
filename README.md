@@ -1,95 +1,69 @@
-# HTML/Template (Plus Plus)
-## htpp - opinionated improvements to Go HTML templating
-Really, this is just so I can
-1. Have a single executable to render a template, which
-2. Using `extends` syntax to define dependencies, to
-3. Allow me to make a ParcelJS plugin, so
-4. I can develop frontends with the Parcel build system and development server that use Go templates
+# htpp
 
----
-## Current Status - **Work In Progress**
-### Syntax
-#### `extends` syntax
+A thin wrapper around Go's `html/template` that adds an `extends` directive for template inheritance. Built to power a ParcelJS plugin so Go templates can be used with the Parcel development server.
+
+## How it works
+
+A child template declares its parent with `extends` on the first line:
+
 ```
-extends <relative-path-to-template>
-```
-See: [examples/simple](./examples/simple)
-### CLI
-```
-htpp
-
-Usage:
-  htpp [--std-in] <filename>
-  htpp [--print-dependencies] <filename>
-
-Options:
-  --std-in              Read JSON applied to template from stdin
-  --print-dependencies  Print all dependencies of the supplied template. Does not execute the template.
-````
-
-## Future Thoughts / ToDo
-- [ ] public api to render template
-  - [ ] support non-file (in-memory, `string`) templates
-  - [ ] support directory of templates
-- [ ] cache template compilation for future runs
-- [ ] other relative path resolvers? See below.
-  
-### File resolvers
-- Each template has an identifier
-- if the identifier is a filename, template can be resolved relatively, absolutely, by name with or without ext
-- how are conflicts handled? e.g. `foo` and `foo.tmpl`?
-
-Relative File - **DONE**
-```gotemplate
 extends ./base.htpp
 
-{{block "body"}}
+{{ define "body" }}
 <div>
-    <p>This is a test</p>
+  <p>Hello from home!</p>
 </div>
-{{end}}
+{{ end }}
 ```
 
-Relative File - **DONE**
-```gotemplate
-extends ../base.htpp
+`htpp` resolves the full extends chain, compiles the templates in order (base first, then each child), and renders the result.
 
-{{block "body"}}
-<div>
-    <p>This is a test</p>
-</div>
-{{end}}
+See [`examples/simple/`](./examples/simple) for a working example.
+
+## Installation
+
+**Nix:**
+```bash
+nix run github:sdedovic/htpp -- <filename>
 ```
 
-Absolute File - **PROPOSED**
-```gotemplate
-extends /base.htpp
-
-{{block "body"}}
-<div>
-    <p>This is a test</p>
-</div>
-{{end}}
+**Go:**
+```bash
+go install github.com/sdedovic/htpp/cmd/htpp@latest
 ```
 
-Identifier or Adjacent File - **PROPOSED**
-```gotemplate
-extends base.htpp
+## CLI
 
-{{block "body"}}
-<div>
-    <p>This is a test</p>
-</div>
-{{end}}
+```
+htpp [options] <filename>
+
+Options:
+  --stdin               Read JSON from stdin and apply it as template data
+  --print-dependencies  Print the extends chain (one file per line). Does not render.
 ```
 
-Identifier - **PROPOSED**
-```gotemplate
-extends base
-
-{{block "body"}}
-<div>
-    <p>This is a test</p>
-</div>
-{{end}}
+**Render a template:**
+```bash
+htpp examples/simple/home.htpp
 ```
+
+**Render with data from stdin:**
+```bash
+echo '{"name": "world"}' | htpp --stdin examples/simple/home.htpp
+```
+
+**Print dependency chain (for cache invalidation):**
+```bash
+htpp --print-dependencies examples/simple/home.htpp
+```
+
+## Syntax
+
+Only relative paths are supported in `extends`:
+
+```
+extends ./base.htpp      # sibling file
+extends ../layouts/base.htpp  # parent directory
+```
+
+The rest of the file is a standard Go `html/template`. Use `{{ define "block" }}` to override blocks defined in the parent.

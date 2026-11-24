@@ -5,13 +5,13 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	htpp "github.com/sdedovic/htpp/internal"
-	"log"
 	"os"
+
+	htpp "github.com/sdedovic/htpp/internal"
 )
 
-func mainErr() error {
-	readFromStdin := flag.Bool("std-in", false, "Read JSON applied to template from stdin")
+func run() error {
+	readFromStdin := flag.Bool("stdin", false, "Read JSON applied to template from stdin")
 	printDependencies := flag.Bool("print-dependencies", false, "Print all dependencies of the supplied template. Does not execute the template.")
 	flag.Parse()
 
@@ -22,33 +22,29 @@ func mainErr() error {
 
 	var data map[string]any
 	if *readFromStdin {
-		err := json.NewDecoder(os.Stdin).Decode(&data)
-		if err != nil {
+		if err := json.NewDecoder(os.Stdin).Decode(&data); err != nil {
 			return err
 		}
 	}
 
-	template, err := htpp.Make(filename)
+	tmpl, err := htpp.Compile(filename)
 	if err != nil {
 		return err
 	}
 
 	if *printDependencies {
-		for _, dep := range template.Dependencies {
+		for _, dep := range tmpl.Dependencies {
 			fmt.Println(dep)
 		}
-	} else {
-		err = template.Inner.Execute(os.Stdout, data)
-		if err != nil {
-			return err
-		}
+		return nil
 	}
 
-	return nil
+	return tmpl.Execute(os.Stdout, data)
 }
 
 func main() {
-	if err := mainErr(); err != nil {
-		log.Fatalln("FATAL", fmt.Sprintf("main exited caused by: %v", err))
+	if err := run(); err != nil {
+		fmt.Fprintf(os.Stderr, "htpp: %v\n", err)
+		os.Exit(1)
 	}
 }
