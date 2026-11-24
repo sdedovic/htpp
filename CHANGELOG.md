@@ -26,7 +26,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - `template.Must(Clone())` replaced with proper error handling — no more panics on Clone failure
 - `extends` line parsing now uses `SplitN` to correctly handle paths containing spaces
 
-## [0.0.1] - 2024-01-01
+## [0.0.1] - 2024-10-12
 
 ### Added
 - Initial release: `extends` directive for Go `html/template`
