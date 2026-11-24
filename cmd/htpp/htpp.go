@@ -7,7 +7,7 @@ import (
 	"fmt"
 	"os"
 
-	htpp "github.com/sdedovic/htpp/internal"
+	"github.com/sdedovic/htpp"
 )
 
 func run() error {

@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-11-23
+
+### Changed
+- Library code moved from `internal/` to the module root — `github.com/sdedovic/htpp` is now importable as a library
+
 ## [0.1.0] - 2026-11-23
 
 ### Added
@@ -33,6 +38,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - CLI with `--std-in` and `--print-dependencies` flags
 - Nix flake build
 
-[Unreleased]: https://github.com/sdedovic/htpp/compare/v0.1.0...HEAD
+[Unreleased]: https://github.com/sdedovic/htpp/compare/v0.2.0...HEAD
+[0.2.0]: https://github.com/sdedovic/htpp/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/sdedovic/htpp/compare/v0.0.1...v0.1.0
 [0.0.1]: https://github.com/sdedovic/htpp/releases/tag/v0.0.1

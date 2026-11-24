@@ -12,7 +12,7 @@ import (
 )
 
 var (
-	ErrInvalidExtends      = errors.New("extends has invalid syntax")
+	ErrInvalidExtends        = errors.New("extends has invalid syntax")
 	ErrUnresolvableExtension = errors.New("could not resolve template extension")
 
 	relativeFileRegex = regexp.MustCompile(`^\.{1,2}/`)
